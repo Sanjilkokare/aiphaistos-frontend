@@ -1,7 +1,9 @@
+// frontend/app/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Link from "next/link";
 
 export default function Home() {
   const [pdfFile, setPdfFile] = useState<File | null>(null);
@@ -13,13 +15,10 @@ export default function Home() {
   const [matchedDoc, setMatchedDoc] = useState("");
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [showAbout, setShowAbout] = useState(false);
 
-  // Pull backend URL from env or fallback to localhost
-  const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000";
+  const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
 
   useEffect(() => {
-    console.log("Redeploy triggered");
     fetchDocs();
   }, []);
 
@@ -35,7 +34,6 @@ export default function Home() {
   const uploadPDF = async () => {
     if (!pdfFile) return alert("Please select a file to upload.");
     setUploading(true);
-
     const formData = new FormData();
     formData.append("file", pdfFile);
 
@@ -76,10 +74,15 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-black text-white p-8 max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold text-center mb-2">📚 AIPHAISTOS QA Demo</h1>
-      <p className="text-center text-gray-400 mb-6 text-sm">
-        An intelligent document QA system for 50,000–1M+ PDF, TXT, CSV files. This demo supports PDFs only.
+    <main className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white p-6 max-w-3xl mx-auto">
+      <div className="flex justify-between items-center">
+        <h1 className="text-4xl font-bold mb-3">📚 AIPHAISTOS QA Demo</h1>
+        <Link href="/about">
+          <button className="text-sm text-blue-400 underline hover:text-blue-600">View About</button>
+        </Link>
+      </div>
+      <p className="text-gray-400 mb-6">
+        This is a <strong>demo version</strong> of the real AIPHAISTOS Project. Our production system processes over <strong>50,000+ documents</strong> and can intelligently answer questions from architectural plans, manuals, and large PDF archives.
       </p>
 
       {/* Upload PDF */}
@@ -130,7 +133,6 @@ export default function Home() {
         </button>
       </div>
 
-      {/* Answer Result */}
       {answer && !loading && (
         <div className="bg-gray-900 border border-gray-700 p-4 rounded mb-6">
           <h2 className="text-green-400 font-semibold mb-2">Answer:</h2>
@@ -146,7 +148,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* PDF Preview */}
       {matchedDoc && (
         <div className="mt-4">
           <p className="text-sm text-gray-400 mb-2">Matched Document:</p>
@@ -157,30 +158,6 @@ export default function Home() {
           />
         </div>
       )}
-
-      {/* About Section */}
-      <div className="mt-12">
-        <button
-          onClick={() => setShowAbout(!showAbout)}
-          className="text-blue-400 underline text-sm"
-        >
-          {showAbout ? "Hide Project Summary" : "About the AIPHAISTOS Project"}
-        </button>
-
-        {showAbout && (
-          <div className="mt-4 bg-gray-900 p-4 rounded border border-gray-700 text-sm leading-relaxed text-gray-300 whitespace-pre-wrap">
-            <strong>Project Summary – AIPHAISTOS Multimodal QA System</strong>
-
-            {"\n\n"}The AIPHAISTOS project aims to build a robust multimodal question-answering system capable of understanding and reasoning over complex technical and contractual documents, including architectural blueprints and PDF manuals.
-
-            {"\n\n"}From the initial stage, we developed a FastAPI + React app supporting hybrid retrieval (FAISS + BM25), integrated with LLMs (Zephyr, Mistral) for deep reasoning, and added logging, document isolation, and chunk inspection.
-
-            {"\n\n"}We addressed challenges like poor OCR quality and missing context by implementing clean .txt ingestion, blueprint-aware processing (via LayoutLMv3), and fallback reranking using LLMs.
-
-            {"\n\n"}Despite these, certain blueprint-heavy queries still produce generic or hallucinated answers due to weak chunk embedding or noisy inputs. To overcome this, we are now considering LoRA fine-tuning to specialize the model on blueprint-specific QA patterns and improve accuracy in high-stakes, structure-heavy queries.
-          </div>
-        )}
-      </div>
     </main>
   );
 }
